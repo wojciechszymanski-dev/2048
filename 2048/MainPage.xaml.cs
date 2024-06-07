@@ -2,10 +2,6 @@
 {
     public partial class MainPage : ContentPage
     {
-        Random rand;
-        int[,] gridState;
-        Grid innerGrid;
-
         public MainPage()
         {
             InitializeComponent();
@@ -14,218 +10,48 @@
 
         private void InitializeUI()
         {
-            outerGrid.AddColumnDefinition(new ColumnDefinition(10));
-            outerGrid.AddColumnDefinition(new ColumnDefinition { Width = new GridLength(6, GridUnitType.Star) });
-            outerGrid.AddColumnDefinition(new ColumnDefinition { Width = new GridLength(4, GridUnitType.Star) });
-            outerGrid.AddColumnDefinition(new ColumnDefinition(10));
+            mainGrid.AddColumnDefinition(new ColumnDefinition(10));
+            mainGrid.AddColumnDefinition(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            mainGrid.AddColumnDefinition(new ColumnDefinition(10));
 
-            outerGrid.AddRowDefinition(new RowDefinition(10));
-            outerGrid.AddRowDefinition(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            outerGrid.AddRowDefinition(new RowDefinition(10));
+            mainGrid.AddRowDefinition(new RowDefinition(10));
+            mainGrid.AddRowDefinition(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.AddRowDefinition(new RowDefinition(10));
 
-            innerGrid = new Grid
-            {
-                WidthRequest = 800,
-                HeightRequest = 800,
-            };
-
-            for (int i = 0; i < 6; i++)
-            {
-                innerGrid.AddRowDefinition(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-                innerGrid.AddColumnDefinition(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            }
-
-            outerGrid.Add(innerGrid, 1, 1);
-
-            rand = new Random();
-            gridState = new int[4, 4];
-            int[] randomIndex = { rand.Next(0, 4), rand.Next(0, 4) };
-            gridState[randomIndex[0], randomIndex[1]] = 2;
-
-            UpdateUI();
-
-            Grid navGrid = new Grid();
-
-            navGrid.AddColumnDefinition(new ColumnDefinition(10));
-            navGrid.AddColumnDefinition(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            navGrid.AddColumnDefinition(new ColumnDefinition(10));
-            navGrid.AddRowDefinition(new RowDefinition(10));
-            navGrid.AddRowDefinition(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            navGrid.AddRowDefinition(new RowDefinition(10));
-            outerGrid.Add(navGrid, 2, 1);
-
-            VerticalStackLayout vStack = new()
+            VerticalStackLayout mainStack = new VerticalStackLayout() 
             {
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
             };
-            HorizontalStackLayout hStack = new();
+            mainGrid.Add(mainStack, 1, 1);
 
-            navGrid.Add(vStack, 1, 1);
-
-            string[] navigationButtonTextArr = { "W", "A", "S", "D" };
-            for (int x = 0; x < navigationButtonTextArr.Length; x++)
+            Label label = new Label
             {
-                Button button = new Button
-                {
-                    WidthRequest = 100,
-                    HeightRequest = 100,
-                    Text = navigationButtonTextArr[x],
-                    TextColor = Colors.Black,
-                    CornerRadius = 10,
-                    BackgroundColor = Color.FromArgb("#bbb"),
-                };
-                button.Clicked += (sender, e) =>
-                {
-                    NavigationButtonClicked(button.Text);
-                };
+                Text = "2048",
+                FontFamily = "Poppins",
+                TextColor = Colors.White,
+                FontSize = 200,
+                HorizontalTextAlignment = TextAlignment.Center,
+            };
 
-                if (button.Text == "W") vStack.Children.Add(button);
-                else
-                {
-                    hStack.Children.Add(button);
-                }
-            }
-            vStack.Children.Add(hStack);
-        }
-
-        private void NavigationButtonClicked(string direction)
-        {
-            switch (direction)
+            Button button = new Button
             {
-                case "W":
-                    MoveUp();
-                    break;
-                case "S":
-                    MoveDown();
-                    break;
-                case "A":
-                    MoveLeft();
-                    break;
-                case "D":
-                    MoveRight();
-                    break;
-            }
-            UpdateUI();
-        }
+                TextColor = Colors.White,
+                FontAttributes = FontAttributes.Bold, 
+                Text = "Start",
+                FontSize = 20,
+                WidthRequest = 250,
+                HeightRequest = 75,
+                BackgroundColor = Colors.LimeGreen,
+                CornerRadius = 5,
+                HorizontalOptions = LayoutOptions.Center,
+            };
+            button.Clicked += async (sender, e) => 
+                await Navigation.PushAsync(new GamePage());
 
-        private void MoveUp()
-        {
-            for (int col = 0; col < 4; col++)
-            {
-                for (int row = 1; row < 4; row++)
-                {
-                    if (gridState[row, col] != 0)
-                    {
-                        int currentRow = row;
-                        while (currentRow > 0 && gridState[currentRow - 1, col] == 0)
-                        {
-                            gridState[currentRow - 1, col] = gridState[currentRow, col];
-                            gridState[currentRow, col] = 0;
-                            currentRow--;
-                        }
-                        if (currentRow > 0 && gridState[currentRow - 1, col] == gridState[currentRow, col])
-                        {
-                            gridState[currentRow - 1, col] *= 2;
-                            gridState[currentRow, col] = 0;
-                        }
-                    }
-                }
-            }
+            mainStack.Children.Add(label);
+            mainStack.Children.Add(button);
         }
-
-        private void MoveDown()
-        {
-            for (int col = 0; col < 4; col++)
-            {
-                for (int row = 2; row >= 0; row--)
-                {
-                    if (gridState[row, col] != 0)
-                    {
-                        int currentRow = row;
-                        while (currentRow < 3 && gridState[currentRow + 1, col] == 0)
-                        {
-                            gridState[currentRow + 1, col] = gridState[currentRow, col];
-                            gridState[currentRow, col] = 0;
-                            currentRow++;
-                        }
-                        if (currentRow < 3 && gridState[currentRow + 1, col] == gridState[currentRow, col])
-                        {
-                            gridState[currentRow + 1, col] *= 2;
-                            gridState[currentRow, col] = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void MoveLeft()
-        {
-            for (int row = 0; row < 4; row++)
-            {
-                for (int col = 1; col < 4; col++)
-                {
-                    if (gridState[row, col] != 0)
-                    {
-                        int currentCol = col;
-                        while (currentCol > 0 && gridState[row, currentCol - 1] == 0)
-                        {
-                            gridState[row, currentCol - 1] = gridState[row, currentCol];
-                            gridState[row, currentCol] = 0;
-                            currentCol--;
-                        }
-                        if (currentCol > 0 && gridState[row, currentCol - 1] == gridState[row, currentCol])
-                        {
-                            gridState[row, currentCol - 1] *= 2;
-                            gridState[row, currentCol] = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void MoveRight()
-        {
-            for (int row = 0; row < 4; row++)
-            {
-                for (int col = 2; col >= 0; col--)
-                {
-                    if (gridState[row, col] != 0)
-                    {
-                        int currentCol = col;
-                        while (currentCol < 3 && gridState[row, currentCol + 1] == 0)
-                        {
-                            gridState[row, currentCol + 1] = gridState[row, currentCol];
-                            gridState[row, currentCol] = 0;
-                            currentCol++;
-                        }
-                        if (currentCol < 3 && gridState[row, currentCol + 1] == gridState[row, currentCol])
-                        {
-                            gridState[row, currentCol + 1] *= 2;
-                            gridState[row, currentCol] = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void UpdateUI()
-        {
-            innerGrid.Children.Clear();
-            for (int row = 1; row <= 4; row++)
-            {
-                for (int col = 1; col <= 4; col++)
-                {
-                    Button button = new Button
-                    {
-                        BackgroundColor = Colors.AliceBlue,
-                        CornerRadius = 10,
-                        FontSize = 80,
-                        Text = gridState[row - 1, col - 1] == 0 ? "" : gridState[row - 1, col - 1].ToString()
-                    };
-                    innerGrid.Add(button, col, row);
-                }
-            }
-        }
+       
     }
 }

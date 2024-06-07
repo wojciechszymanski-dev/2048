@@ -3,5 +3,5 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="_2048.MainPage">
 
-    <Grid x:Name="outerGrid"></Grid>
+    <Grid x:Name="mainGrid"></Grid>
 </ContentPage>
